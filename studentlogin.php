@@ -1,3 +1,53 @@
+<?php
+// Start the session
+session_start();
+
+// Include database connection file
+include("db_connect.php"); // Assuming db_connect.php contains the code to connect to the database
+
+// Check if the form is submitted
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get the input values
+    $student_id = $_POST['username']; // Student ID (rollno)
+    $password = $_POST['password'];   // Password (dob)
+
+    // Sanitize the inputs to prevent SQL injection
+    $student_id = mysqli_real_escape_string($conn, $student_id);
+    $password = mysqli_real_escape_string($conn, $password);
+
+    // Prepared statement for checking credentials
+    $query = "SELECT * FROM studentdet WHERE rollno = ? AND dob = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "ss", $student_id, $password);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // Check if a matching record is found
+    if (mysqli_num_rows($result) > 0) {
+        // Fetch the data from the result
+        $row = mysqli_fetch_assoc($result);
+
+        // Store session data
+        $_SESSION['student_id'] = $student_id;  // Store rollno in session
+        $_SESSION['dob'] = $password;           // Store dob in session
+        $_SESSION['name'] = $row['name'];       // Store name in session
+
+        // Redirect to the student dashboard
+        header("Location: studentdashboard.php");
+        exit();
+    } else {
+        // If student_id or password doesn't match
+        echo "<script>alert('Invalid Student ID or Password');</script>";
+    }
+
+    // Close the statement
+    mysqli_stmt_close($stmt);
+}
+
+// Close the database connection
+mysqli_close($conn);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,18 +248,18 @@
     
     <h2 class="mb-4 text-center text-white" style="font-size: 45px;font-family:roboto;">Student Login</h2>
     
-    <form style="width: 80%; max-width: 400px;">
-        <div class="mb-3">
-            <label for="username" class="form-label text-white">Student ID</label>
-            <input type="text" class="form-control" id="username" placeholder="Enter Student ID" required>
-        </div>
-        <div class="mb-3 password-wrapper">
-            <label for="password" class="form-label text-white">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Enter password" required>
-            <i class="fas fa-eye-slash" id="togglePassword" style="padding-top: 30px;"></i>
-        </div><br>
-        <button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
+    <form action="" method="POST" style="width: 80%; max-width: 400px;">
+    <div class="mb-3">
+        <label for="username" class="form-label text-white">Student ID</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="Enter Student ID" required>
+    </div>
+    <div class="mb-3 password-wrapper">
+        <label for="password" class="form-label text-white">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+        <i class="fas fa-eye-slash" id="togglePassword" style="padding-top: 30px;"></i>
+    </div><br>
+    <button type="submit" class="btn btn-primary w-100">Login</button>
+</form>
 
     <!-- Bottom Transparent Image -->
     <img src="img/flower2transparent.png" class="transparent-img bottom-img" alt="Bottom Image">
