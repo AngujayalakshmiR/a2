@@ -3,7 +3,7 @@
 session_start();
 
 // Include database connection file
-include("db_connect.php"); // Assuming db_connect.php contains the code to connect to the database
+include("db_connect.php");
 
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

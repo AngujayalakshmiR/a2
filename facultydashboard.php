@@ -1,9 +1,36 @@
+<?php
+// Start the session
+session_start();
+
+// Prevent caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+
+// Check if the faculty is logged in
+if (!isset($_SESSION['faculty_id'])) {
+    // If not logged in, redirect to login page
+    header("Location: index.php");
+    exit();
+}
+
+// Check if logout is requested
+if (isset($_GET['logout'])) {
+    // Destroy the session to log out
+    session_destroy();
+    header("Location: index.php");
+    exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -145,8 +172,12 @@
                 <span class="navbar-brand mb-0 h5"><b>Dashboard</b></span>
             </div>
             <!-- Logout Button -->
-            <button class="btn btn-danger" onclick="logout()">Logout</button>
-        </div>
+            <a href="javascript:void(0);" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="menu-text">Logout</span>
+        </a>
+    
+    </div>
 
       <!-- Page Content -->
 <div class="content">
@@ -215,10 +246,23 @@
         }
     }
 
-    function logout() {
-        // Add your logout functionality here
-        alert("Logged out successfully!");
-    }
+ 
+    </script>
+     <script>
+        document.getElementById("logoutBtn").addEventListener("click", function() {
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, logout!',
+                cancelButtonText: 'No, cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to logout.php to destroy session
+                    window.location.href = "logout.php";
+                }
+            });
+        });
     </script>
 </body>
 </html>
