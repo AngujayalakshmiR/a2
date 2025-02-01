@@ -2,6 +2,9 @@
 // Start the session
 session_start();
 
+// Include database connection file
+include('db_connect.php');
+
 // Prevent caching
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
@@ -21,7 +24,27 @@ if (isset($_GET['logout'])) {
     header("Location: index.php");
     exit();
 }
+// Retrieve faculty details
+$faculty_id = $conn->real_escape_string($_SESSION['faculty_id']); // Sanitize input
+$sql = "SELECT * FROM facultydet WHERE rollno = '$faculty_id'"; // Use quotes around the value
+$result = $conn->query($sql);
+
+if ($result === false) {
+    // Output the error if the query fails
+    echo "Error: " . $conn->error;
+    exit();
+}
+
+$faculty = $result->fetch_assoc();
+if (!$faculty) {
+    echo "No faculty found with the given ID.";
+    exit();
+}
+
 ?>
+
+<!-- Rest of your HTML and PHP code here -->
+
 
 
 <!DOCTYPE html>
@@ -158,8 +181,8 @@ if (isset($_GET['logout'])) {
   <!-- Sidebar -->
 <div class="sidebar" id="sidebar"><br>
     <h4 class="text-center w-100"><b>Faculty Panel</b></h4><br><br>
-    <a href="#" class="active"><i class="fas fa-tachometer-alt fa-2x"></i> <span class="menu-text"><b>Dashboard</b></span></a>
-    <a href="#"><i class="fas fa-user-graduate fa-2x"></i> <span class="menu-text"><b>Student Records</b></span></a>
+    <a href="facultydashboard.php" class="active"><i class="fas fa-tachometer-alt fa-2x"></i> <span class="menu-text"><b>Dashboard</b></span></a>
+    <a href="facultystudent_record.php"><i class="fas fa-user-graduate fa-2x"></i> <span class="menu-text"><b>Student Records</b></span></a>
 </div>
 
 
@@ -182,43 +205,44 @@ if (isset($_GET['logout'])) {
       <!-- Page Content -->
 <div class="content">
     <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card p-3 card-hover" style="background-color: #2980b9; color: white;">
-                <h5>Name</h5>
-                <h2>10</h2>
-            </div>
-        </div><br>
+    <div class="col-md-4">
+    <div class="card p-3 card-hover" style="background-color: #2980b9; color: white;">
+        <h5>Name</h5>
+        <h2><?php echo $faculty['name']; ?></h2>
+    </div>
+</div>
+
         <div class="col-md-4">
             <div class="card p-3 card-hover" style="background-color: #f39c12; color: white;">
                 <h5>ID</h5>
-                <h2>IT0023</h2>
-            </div>
+                <h2><?php echo $faculty['rollno']; ?></h2>
+                </div>
         </div><br>
         <div class="col-md-4">
             <div class="card p-3 card-hover" style="background-color: #45b39d; color: white;">
                 <h5>DOB</h5>
-                <h2>5</h2>
-            </div>
+                <h2><?php echo $faculty['dob']; ?></h2>
+                </div>
         </div>
     </div>
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card p-3 card-hover" style="background-color: #8e44ad; color: white;">
                 <h5>Designation</h5>
-                <h2>10</h2>
-            </div>
+                <h2><?php echo $faculty['designation']; ?></h2>
+                </div>
         </div><br>
         <div class="col-md-4">
             <div class="card p-3 card-hover" style="background-color: #16a085; color: white;">
                 <h5>Student Enrolled</h5>
-                <h2>IT0023</h2>
-            </div>
+                <h2><?php echo $faculty['dob']; ?></h2>
+                </div>
         </div><br>
         <div class="col-md-4">
             <div class="card p-3 card-hover" style="background-color: #f1c40f; color: white;">
                 <h5>Section</h5>
-                <h2>5</h2>
-            </div>
+                <h2><?php echo $faculty['section']; ?></h2>
+                </div>
         </div>
     </div>
 </div>
