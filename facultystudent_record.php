@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Start the session
 session_start();
 
@@ -13,6 +13,14 @@ header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 // Check if the faculty is logged in
 if (!isset($_SESSION['faculty_id'])) {
     // If not logged in, redirect to login page
+    header("Location: index.php");
+    exit();
+}
+
+// Check if logout is requested
+if (isset($_GET['logout'])) {
+    // Destroy the session to log out
+    session_destroy();
     header("Location: index.php");
     exit();
 }
@@ -34,13 +42,16 @@ if (!$faculty) {
     exit();
 }
 
-// Retrieve students from the same section as the faculty (e.g., IT-A)
-$faculty_section = $faculty['section'];  // Assuming 'section' is the field name
-$sql_students = "SELECT * FROM studentdet WHERE section = '$faculty_section'";
-$students_result = $conn->query($sql_students);
+// Fetch the faculty's section
+$faculty_section = $faculty['section'];
 
-if ($students_result === false) {
-    echo "Error fetching students: " . $conn->error;
+// Fetch students from the same section
+$sql_students = "SELECT * FROM studentdet WHERE section = '$faculty_section'";
+$result_students = $conn->query($sql_students);
+
+if ($result_students === false) {
+    // Output the error if the query fails
+    echo "Error: " . $conn->error;
     exit();
 }
 ?>
@@ -56,12 +67,12 @@ if ($students_result === false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- Bootstrap 5.0.2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- DataTables CSS -->
-<!-- DataTables CSS -->
-<link href="https://cdn.jsdelivr.net/npm/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
-
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -166,9 +177,14 @@ if ($students_result === false) {
     color: white;
 }
 
-.dataTables_filter {
-        margin-bottom: 20px; /* Adjust as needed */
-    }
+
+        .table-responsive {
+            overflow-x: auto !important;
+            max-width: 100% !important;
+            white-space: nowrap !important;
+            display: block !important;
+        }
+   
     </style>
 </head>
 <body>
@@ -199,53 +215,59 @@ if ($students_result === false) {
           <!-- Add Student Button -->
           <button class="btn btn-gradient mb-3" data-bs-toggle="modal" data-bs-target="#addStudentModal">
               <i class="fas fa-user-plus"></i> Add Student
-          </button>
+          </button><br><br>
 
-          <div class="table-responsive">
-            <table id="studentsTable" class="table table-striped table-bordered">
-            <thead>
-                 <tr>
-                <th>Name</th>
-                <th>RollNo</th>
-                <th>DOB</th>
-                <th>Section</th>
-                <th>Attendance</th>
-                <th>Subject1</th>
-                <th>Subject2</th>
-                <th>Subject3</th>
-                <th>Subject4</th>
-                <th>Subject5</th>
-                <th>Total</th>
-                <th>Avg</th>
-                <th>Percentage</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if ($students_result->num_rows > 0) {
-                while($row = $students_result->fetch_assoc()) {
-                    echo "<tr>
-                            <td>{$row['name']}</td>
-                            <td>{$row['rollno']}</td>
-                            <td>{$row['dob']}</td>
-                            <td>{$row['section']}</td>
-                            <td>{$row['attendance']}</td>
-                            <td>{$row['s1']}</td>
-                            <td>{$row['s2']}</td>
-                            <td>{$row['s3']}</td>
-                            <td>{$row['s4']}</td>
-                            <td>{$row['s5']}</td>
-                            <td>{$row['total']}</td>
-                            <td>{$row['avg']}</td>
-                            <td>{$row['percentage']}</td>
-                          </tr>";
+
+        <div class="container mt-4">
+            <div class="table-responsive">
+                <table id="studentTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Name</th>
+                            <th>RollNo</th>
+                            <th>DOB</th>
+                            <th>Section</th>
+                            <th>Attendance</th>
+                            <th>Subject1</th>
+                            <th>Subject2</th>
+                            <th>Subject3</th>
+                            <th>Subject4</th>
+                            <th>Subject5</th>
+                            <th>Total</th>
+                            <th>Avg</th>
+                            <th>Percentage</th>
+                        </tr>
+                        </thead>
+            <tbody>
+                <?php
+                if ($result_students->num_rows > 0) {
+                    $counter = 1;
+                    while ($student = $result_students->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>" . $counter++ . "</td>";
+                        echo "<td>" . $student['name'] . "</td>";
+                        echo "<td>" . $student['rollno'] . "</td>";
+                        echo "<td>" . $student['dob'] . "</td>";
+                        echo "<td>" . $student['section'] . "</td>";
+                        echo "<td>" . $student['attendance'] . "</td>";
+                        echo "<td>" . $student['s1'] . "</td>";
+                        echo "<td>" . $student['s2'] . "</td>";
+                        echo "<td>" . $student['s3'] . "</td>";
+                        echo "<td>" . $student['s4'] . "</td>";
+                        echo "<td>" . $student['s5'] . "</td>";
+                        echo "<td>" . $student['total'] . "</td>";
+                        echo "<td>" . $student['avg'] . "</td>";
+                        echo "<td>" . $student['percentage'] . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='14' class='text-center'>No students found in this section</td></tr>";
                 }
-            } else {
-                echo "<tr><td colspan='13'>No students found.</td></tr>";
-            }
-            ?>
-        </tbody>
-    </table>
+                ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
       </div>
@@ -362,20 +384,25 @@ if ($students_result === false) {
         }
     });
 </script>
+<!-- jQuery (Required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/datatables.net/js/jquery.dataTables.min.js"></script>
 
-  <!-- Bootstrap JS and Popper.js -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-  
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- jQuery (necessary for DataTables) -->
-  <script>
-   
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Initialize DataTable -->
+<script>
     $(document).ready(function() {
-        $('#studentsTable').DataTable({
-            responsive: true
-        });
+        $('#studentTable').DataTable({
+    "responsive": true,
+    "autoWidth": true,
+    "scrollX": true
+    });
+
     });
 </script>
 
